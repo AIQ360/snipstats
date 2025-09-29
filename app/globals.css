@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Notion-inspired light theme */
+    --background: 0 0% 100%;
+    --foreground: 38 5% 21%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 38 5% 21%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 38 5% 21%;
+
+    --primary: 38 5% 21%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 38 5% 21%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 38 5% 45%;
+
+    --accent: 0 0% 96%;
+    --accent-foreground: 38 5% 21%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
+    --ring: 38 5% 21%;
+
+    --radius: 0.3rem;
+  }
+
+  .dark {
+    /* Notion-inspired dark theme */
+    --background: 0 0% 13%;
+    --foreground: 0 0% 93%;
+
+    --card: 0 0% 13%;
+    --card-foreground: 0 0% 93%;
+
+    --popover: 0 0% 13%;
+    --popover-foreground: 0 0% 93%;
+
+    --primary: 0 0% 93%;
+    --primary-foreground: 0 0% 13%;
+
+    --secondary: 0 0% 17%;
+    --secondary-foreground: 0 0% 93%;
+
+    --muted: 0 0% 17%;
+    --muted-foreground: 0 0% 63%;
+
+    --accent: 0 0% 17%;
+    --accent-foreground: 0 0% 93%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 93%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 83%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Notion-inspired typography */
+  h1 {
+    @apply text-3xl font-medium tracking-tight;
+  }
+  h2 {
+    @apply text-2xl font-medium tracking-tight;
+  }
+  h3 {
+    @apply text-xl font-medium;
+  }
+  p {
+    @apply leading-relaxed;
+  }
+
+  /* Notion-inspired card styling */
+  .notion-card {
+    @apply bg-card border border-border rounded-md shadow-notion-card hover:shadow-md transition-shadow duration-200;
+  }
+
+  /* Notion-inspired button styling */
+  .notion-button {
+    @apply px-4 py-1.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors duration-200;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Add these styles to the end of your globals.css file */
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--primary) / 0.2);
+  --rdp-accent-color-dark: hsl(var(--primary));
+  --rdp-background-color-dark: hsl(var(--primary) / 0.2);
+  --rdp-outline: 2px solid var(--rdp-accent-color);
+  --rdp-outline-selected: 2px solid var(--rdp-accent-color);
+  margin: 0;
+}
+
+.rdp-months {
+  justify-content: center;
+}
+
+.rdp-month {
+  background-color: hsl(var(--background));
+}
+
+.rdp-day_selected,
+.rdp-day_selected:focus-visible,
+.rdp-day_selected:hover {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.rdp-day_range_start,
+.rdp-day_range_end {
+  border-radius: 0.5rem;
+}
+
+.rdp-day_range_middle {
+  background-color: hsl(var(--primary) / 0.2);
+}
+
+/* Fix for popover content */
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+  z-index: 100 !important;
+}

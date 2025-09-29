@@ -1,0 +1,25 @@
+import { NextResponse } from "next/server"
+import { createClient } from "@/utils/supabase/server"
+import { syncGoogleAnalyticsData } from "@/lib/google/sync"
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { startDate, endDate } = await request.json()
+
+    await syncGoogleAnalyticsData(user.id, startDate, endDate)
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error in analytics sync:", error)
+    return NextResponse.json({ error: "Failed to sync analytics data" }, { status: 500 })
+  }
+}
