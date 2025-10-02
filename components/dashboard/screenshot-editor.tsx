@@ -61,7 +61,7 @@ function CollapsibleSection({ title, defaultOpen = false, children }: Collapsibl
 interface ScreenshotEditorProps {
   websiteUrl: string
   dateRange?: DateRange
-  analyticsData: any[]
+  analyticsData?: any[]
 }
 
 // Background themes
@@ -134,7 +134,7 @@ interface CustomComponent {
   props: Record<string, any>
 }
 
-export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData }: ScreenshotEditorProps) {
+export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: ScreenshotEditorProps) {
   // Theme state
   const [selectedBackgroundTheme, setSelectedBackgroundTheme] = useState("gradient-blue")
   const [selectedContentTheme, setSelectedContentTheme] = useState("content-light")
@@ -156,14 +156,21 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData }: Scree
   const [showLogo, setShowLogo] = useState(true)
   const [title, setTitle] = useState(websiteUrl || "Website Analytics")
   const [description, setDescription] = useState("")
-  const editorRef = useRef<HTMLDivElement>(null)
-  const previewRef = useRef<HTMLDivElement>(null)
-
-  // Chart display state
   const [showVisitors, setShowVisitors] = useState(true)
   const [showPageViews, setShowPageViews] = useState(true)
   const [showBounceRate, setShowBounceRate] = useState(true)
   const [showSessionDuration, setShowSessionDuration] = useState(true)
+  const editorRef = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
+
+  // Safely coerce values to numbers
+  const toNum = (v: unknown) => {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : 0
+  }
+
+  // Ensure analyticsData is always a valid array of records
+  const safeData = Array.isArray(analyticsData) ? analyticsData.filter((d) => d && typeof d === "object") : []
 
   // Mobile detection
   const [isMobile, setIsMobile] = useState(false)
@@ -182,13 +189,13 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData }: Scree
   }, [])
 
   // Stats calculation
-  const totalVisitors = analyticsData.reduce((sum, item) => sum + item.visitors, 0)
-  const totalPageViews = analyticsData.reduce((sum, item) => sum + item.page_views, 0)
+  const totalVisitors = safeData.reduce((sum, item: any) => sum + toNum(item.visitors), 0)
+  const totalPageViews = safeData.reduce((sum, item: any) => sum + toNum(item.page_views), 0)
   const avgBounceRate =
-    analyticsData.length > 0 ? analyticsData.reduce((sum, item) => sum + item.bounce_rate, 0) / analyticsData.length : 0
+    safeData.length > 0 ? safeData.reduce((sum, item: any) => sum + toNum(item.bounce_rate), 0) / safeData.length : 0
   const avgSessionDuration =
-    analyticsData.length > 0
-      ? analyticsData.reduce((sum, item) => sum + item.avg_session_duration, 0) / analyticsData.length
+    safeData.length > 0
+      ? safeData.reduce((sum, item: any) => sum + toNum(item.avg_session_duration), 0) / safeData.length
       : 0
 
   // Update the addComponent function to handle the combined metrics component
@@ -376,10 +383,18 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData }: Scree
     const contentStyles = getContentThemeStyles()
 
     // Format the data for the chart
-    const formattedData = analyticsData.map((item) => ({
-      ...item,
-      date: new Date(item.date).toISOString().split("T")[0], // Format date consistently
-    }))
+    const formattedData = safeData.map((item: any) => {
+      const d = item?.date ? new Date(item.date) : null
+      const valid = d && !isNaN(d.getTime())
+      return {
+        ...item,
+        date: valid ? d.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+        visitors: toNum(item.visitors),
+        page_views: toNum(item.page_views),
+        bounce_rate: toNum(item.bounce_rate),
+        avg_session_duration: toNum(item.avg_session_duration),
+      }
+    })
 
     // Custom tooltip component
     const CustomTooltip = ({ active, payload, label }: any) => {
@@ -542,12 +557,18 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData }: Scree
   // Update the renderContent function to include the combined metrics view for standard and minimal layouts
   const renderContent = () => {
     const contentStyles = getContentThemeStyles()
+    const hasData = safeData.length > 0
 
     switch (selectedLayout) {
       case "standard":
         return (
           <div className="space-y-4">
             {renderMetricsHeader()}
+            {!hasData && (
+              <div className="text-sm opacity-70 p-3 rounded border">
+                No analytics data yet. Try adjusting the date range or refreshing data.
+              </div>
+            )}
             <div className="mt-2 text-sm opacity-70" style={{ color: contentStyles.color }}>
               {getDateRangeText()}
             </div>
@@ -562,6 +583,11 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData }: Scree
               <div className="text-sm opacity-70 mt-1">Total Visitors</div>
             </div>
             <div className="mt-2 text-center text-sm opacity-70">{getDateRangeText()}</div>
+            {!hasData && (
+              <div className="text-sm opacity-70 p-3 rounded border">
+                No analytics data yet. Try adjusting the date range or refreshing data.
+              </div>
+            )}
             {renderMultiMetricChart()}
           </div>
         )
@@ -967,7 +993,7 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData }: Scree
             </Button>
             <div className="flex gap-2">
               <SocialShare onShare={handleSocialShare} isLoading={isLoading} className="flex-1" />
-              <Button variant="outline" className="flex items-center gap-2 flex-1">
+              <Button variant="outline" className="flex items-center gap-2 flex-1 bg-transparent">
                 <Save size={16} />
                 Save
               </Button>
