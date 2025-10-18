@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { createClient } from "@/utils/supabase/client"
-import { LineChart, Trophy, Star, AlertCircle, Loader2, RefreshCw, TableIcon } from "lucide-react"
+import { LineChart, AlertCircle, Loader2, RefreshCw, TableIcon } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -38,6 +38,17 @@ interface Insight {
   }
 }
 
+interface Event {
+  id?: string
+  user_id: string
+  date: string
+  event_type: "weekly_momentum" | "quality_traffic" | "referrer_milestone" | "growth_acceleration" | "referrer_risk"
+  title: string
+  description: string
+  value: number
+  metadata?: Record<string, any>
+}
+
 const IndieSignalsClient: React.FC = () => {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
@@ -48,9 +59,8 @@ const IndieSignalsClient: React.FC = () => {
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
   const [dayRange, setDayRange] = useState<7 | 14 | 30>(7)
   const [isConnectedToGA, setIsConnectedToGA] = useState<boolean | null>(null)
-  const [events, setEvents] = useState<any[]>([])
+  const [events, setEvents] = useState<Event[]>([])
 
-  // Get user on mount
   useEffect(() => {
     const getUser = async () => {
       const supabase = createClient()
@@ -70,7 +80,6 @@ const IndieSignalsClient: React.FC = () => {
     getUser()
   }, [router])
 
-  // Check if the user has GA connected
   useEffect(() => {
     const checkGAConnection = async () => {
       if (!user) return
@@ -94,7 +103,6 @@ const IndieSignalsClient: React.FC = () => {
     checkGAConnection()
   }, [user])
 
-  // Initial data load
   useEffect(() => {
     if (user && isConnectedToGA) {
       setIsLoading(false)
@@ -104,14 +112,12 @@ const IndieSignalsClient: React.FC = () => {
     }
   }, [user, isConnectedToGA])
 
-  // Effect to handle day range changes - instant updates like other pages
   useEffect(() => {
     if (user && isConnectedToGA) {
       fetchAnalyticsData()
     }
   }, [dayRange, user, isConnectedToGA])
 
-  // Fetch analytics data from the database
   const fetchAnalyticsData = async (showLoading = true) => {
     if (!user) return
 
@@ -120,16 +126,12 @@ const IndieSignalsClient: React.FC = () => {
         setIsLoadingData(true)
       }
 
-      console.log(`Fetching analytics data with dayRange: ${dayRange}`)
-
       const supabase = createClient()
 
-      // Calculate date range
       const endDate = new Date()
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - dayRange)
 
-      // Fetch real analytics data
       const { data: analyticsData, error: analyticsError } = await supabase
         .from("daily_analytics")
         .select("id, user_id, date, visitors, page_views, avg_session_duration, bounce_rate, created_at")
@@ -144,9 +146,6 @@ const IndieSignalsClient: React.FC = () => {
         return
       }
 
-      console.log(`Received ${analyticsData?.length || 0} days of analytics data for ${dayRange} days`)
-
-      // Transform data to match expected format
       const transformedData: AnalyticsData[] = (analyticsData || []).map((item) => ({
         id: item.id,
         user_id: item.user_id,
@@ -158,14 +157,11 @@ const IndieSignalsClient: React.FC = () => {
         created_at: item.created_at,
       }))
 
-      // Calculate insights from real data
       const calculatedInsights = calculateInsights(transformedData)
 
-      // Update state
       setAnalyticsData(transformedData)
       setInsights(calculatedInsights)
 
-      // Also fetch events
       await fetchEvents()
     } catch (error) {
       console.error("Error in analytics fetch:", error)
@@ -177,19 +173,16 @@ const IndieSignalsClient: React.FC = () => {
     }
   }
 
-  // Fetch events data from the database
   const fetchEvents = async () => {
     if (!user) return
 
     try {
       const supabase = createClient()
 
-      // Calculate date range based on dayRange
       const endDate = new Date()
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - dayRange)
 
-      // Fetch events for the selected date range
       const { data: eventsData, error: eventsError } = await supabase
         .from("events")
         .select("*")
@@ -210,13 +203,11 @@ const IndieSignalsClient: React.FC = () => {
     }
   }
 
-  // Calculate insights from real data
   const calculateInsights = (data: AnalyticsData[]): Insight => {
     if (!data || data.length === 0) {
       return {}
     }
 
-    // Find best day
     const bestDay = data.reduce((max, current) => (current.visitors > max.visitors ? current : max))
 
     return {
@@ -227,21 +218,18 @@ const IndieSignalsClient: React.FC = () => {
     }
   }
 
-  // Format date for display
   const formatDate = (dateString: string) => {
     if (!dateString) return ""
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
   }
 
-  // Format time in seconds to minutes and seconds
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = Math.round(seconds % 60)
     return `${minutes}m ${remainingSeconds}s`
   }
 
-  // Format data for the recharts component
   const chartData = analyticsData.map((item) => ({
     date: formatDate(item.date),
     visitors: item.visitors,
@@ -249,56 +237,45 @@ const IndieSignalsClient: React.FC = () => {
     bounceRate: Math.round(item.bounce_rate * 100),
   }))
 
-  // Find the days with highest visitors
-  const getBestDaysForMetric = (metric: "visitors" | "page_views" | "avg_session") => {
-    const sortKey = metric === "page_views" ? "page_views" : metric === "avg_session" ? "avg_session" : "visitors"
-
-    return [...analyticsData]
-      .sort((a, b) => {
-        return b[sortKey] - a[sortKey]
-      })
-      .slice(0, 3)
-  }
-
-  // Handle day range button click
   const handleDayRangeChange = (newRange: 7 | 14 | 30) => {
     if (newRange === dayRange) return
     setDayRange(newRange)
   }
 
-  // Get event icon based on type
   const getEventIcon = (eventType: string) => {
     switch (eventType) {
-      case "spike":
-        return "📈"
-      case "drop":
-        return "📉"
-      case "milestone":
-        return "🏆"
-      case "streak":
+      case "weekly_momentum":
+        return eventType.includes("growth") ? "📈" : "📉"
+      case "quality_traffic":
+        return "✨"
+      case "referrer_milestone":
         return "🔥"
+      case "growth_acceleration":
+        return "🚀"
+      case "referrer_risk":
+        return "⚠️"
       default:
         return "📊"
     }
   }
 
-  // Get event badge color based on type
   const getEventBadgeColor = (eventType: string) => {
     switch (eventType) {
-      case "spike":
+      case "weekly_momentum":
         return "bg-green-100 text-green-800"
-      case "drop":
-        return "bg-red-100 text-red-800"
-      case "milestone":
+      case "quality_traffic":
         return "bg-blue-100 text-blue-800"
-      case "streak":
+      case "referrer_milestone":
         return "bg-orange-100 text-orange-800"
+      case "growth_acceleration":
+        return "bg-purple-100 text-purple-800"
+      case "referrer_risk":
+        return "bg-red-100 text-red-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
   }
 
-  // Format event date
   const formatEventDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
@@ -578,53 +555,17 @@ const IndieSignalsClient: React.FC = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {analyticsData.map((item) => {
-                        const topVisitorDays = getBestDaysForMetric("visitors")
-                        const isTopVisitorDay = topVisitorDays.some((day) => day.id === item.id)
-                        const isTopDay = topVisitorDays[0]?.id === item.id
-
-                        return (
-                          <TableRow
-                            key={item.id}
-                            className={
-                              isTopVisitorDay
-                                ? "bg-amber-50 hover:bg-amber-100 transition-all duration-300"
-                                : "hover:bg-slate-50 transition-all duration-300"
-                            }
-                          >
-                            <TableCell className="text-xs font-medium py-2">
-                              <div className="flex flex-col">
-                                <span>{formatDate(item.date)}</span>
-                                {isTopVisitorDay && (
-                                  <Badge
-                                    className={`mt-1 text-xs px-1 py-0 h-4 ${
-                                      isTopDay ? "bg-gradient-to-r from-amber-400 to-amber-500" : "bg-purple-600"
-                                    }`}
-                                  >
-                                    {isTopDay ? (
-                                      <span className="flex items-center text-xs">
-                                        <Trophy className="h-2 w-2 mr-1" /> Top
-                                      </span>
-                                    ) : (
-                                      <span className="flex items-center text-xs">
-                                        <Star className="h-2 w-2 mr-1" /> Top 3
-                                      </span>
-                                    )}
-                                  </Badge>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell className={`text-xs font-mono py-2 ${isTopVisitorDay ? "font-semibold" : ""}`}>
-                              {item.visitors}
-                            </TableCell>
-                            <TableCell className="text-xs font-mono py-2">{item.page_views}</TableCell>
-                            <TableCell className="text-xs font-mono py-2">{formatTime(item.avg_session)}</TableCell>
-                            <TableCell className="text-xs font-mono py-2">
-                              {(item.bounce_rate * 100).toFixed(1)}%
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
+                      {analyticsData.map((item) => (
+                        <TableRow key={item.id} className="hover:bg-slate-50 transition-all duration-300">
+                          <TableCell className="text-xs font-medium py-2">{formatDate(item.date)}</TableCell>
+                          <TableCell className="text-xs font-mono py-2">{item.visitors}</TableCell>
+                          <TableCell className="text-xs font-mono py-2">{item.page_views}</TableCell>
+                          <TableCell className="text-xs font-mono py-2">{formatTime(item.avg_session)}</TableCell>
+                          <TableCell className="text-xs font-mono py-2">
+                            {(item.bounce_rate * 100).toFixed(1)}%
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
@@ -632,30 +573,30 @@ const IndieSignalsClient: React.FC = () => {
             )}
           </div>
 
-          {/* Events Timeline */}
+          {/* Key Insights - Weekly Events */}
           {events.length > 0 && (
             <div className="mb-16 relative">
               <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-600 to-indigo-400 rounded-full"></div>
               <div className="ml-2">
-                <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-2">Notable Events</h2>
-                <p className="text-muted-foreground mb-8">The moments that matter from your analytics</p>
+                <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-2">Key Insights</h2>
+                <p className="text-muted-foreground mb-8">Weekly trends and meaningful patterns in your data</p>
 
                 <div className="space-y-4">
                   {events.map((event) => (
                     <div
-                      key={event.id}
-                      className="flex items-start gap-4 p-4 bg-gradient-to-r from-slate-50 to-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+                      key={event.id || `${event.date}-${event.event_type}`}
+                      className="flex items-start gap-4 p-4 border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
                     >
-                      <div className="text-2xl flex-shrink-0 mt-1">{getEventIcon(event.event_type)}</div>
+                      <div className="text-2xl flex-shrink-0 mt-0.5">{getEventIcon(event.event_type)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                           <h3 className="font-semibold text-lg">{event.title}</h3>
                           <Badge className={`text-xs px-2 py-1 capitalize ${getEventBadgeColor(event.event_type)}`}>
-                            {event.event_type}
+                            {event.event_type.replace(/_/g, " ")}
                           </Badge>
                         </div>
-                        <p className="text-muted-foreground mb-2 break-words">{event.description}</p>
-                        <p className="text-sm text-muted-foreground">{formatEventDate(event.date)}</p>
+                        <p className="text-muted-foreground mb-2 break-words text-sm">{event.description}</p>
+                        <p className="text-xs text-muted-foreground">{formatEventDate(event.date)}</p>
                       </div>
                     </div>
                   ))}

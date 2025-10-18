@@ -1,14 +1,13 @@
 import { google, type analyticsdata_v1beta } from "googleapis"
 import { getOAuth2Client } from "./auth"
 import { createClient } from "@/utils/supabase/server"
-import { format, subDays } from "date-fns"
-// Add this function at the top of the file
 import { cache } from "react"
+import { detectAndStoreWeeklyEvents } from "@/lib/events/event-detection"
 
 // Define the schema for GA account data from Supabase
 interface GaAccount {
   user_id: string
-  ga_property_id: string // TEXT NOT NULL in schema
+  ga_property_id: string
   access_token: string
   refresh_token: string
   token_expiry: string
@@ -97,7 +96,6 @@ export async function getGoogleAnalyticsData(
     auth: oauth2Client,
   })
 
-  // Log the exact date range being used
   console.log(`GA_DATA: Fetching data for date range: ${startDate} to ${endDate}`)
 
   console.log("GA_DATA: Fetching main report...")
@@ -132,16 +130,12 @@ export async function getGoogleAnalyticsData(
     property: `properties/${propertyId}`,
     requestBody: {
       dateRanges: [{ startDate, endDate }],
-      metrics: [
-        { name: "screenPageViews" },
-        { name: "averageSessionDuration" }, // Add this metric to get engagement time
-      ],
+      metrics: [{ name: "screenPageViews" }, { name: "averageSessionDuration" }],
       dimensions: [{ name: "date" }, { name: "pagePath" }],
     },
   })
   console.log(`GA_DATA: Pages report fetched with ${pagesResponse.data.rows?.length || 0} rows`)
 
-  // NEW: Fetch geographic data
   console.log("GA_DATA: Fetching geographic report...")
   const geographicResponse = await analyticsData.properties.runReport({
     property: `properties/${propertyId}`,
@@ -153,7 +147,6 @@ export async function getGoogleAnalyticsData(
   })
   console.log(`GA_DATA: Geographic report fetched with ${geographicResponse.data.rows?.length || 0} rows`)
 
-  // NEW: Fetch device/browser data
   console.log("GA_DATA: Fetching device report...")
   const deviceResponse = await analyticsData.properties.runReport({
     property: `properties/${propertyId}`,
@@ -195,7 +188,6 @@ async function refreshGoogleToken(userId: string, refreshToken: string) {
 
     console.log("REFRESH_TOKEN: Token refreshed successfully")
 
-    // Update the token in the database
     const { error: updateError } = await supabase
       .from("ga_accounts")
       .update({
@@ -207,15 +199,12 @@ async function refreshGoogleToken(userId: string, refreshToken: string) {
 
     if (updateError) {
       console.error("REFRESH_TOKEN: Error updating token in database:", updateError)
-      // Continue anyway since we have a valid token
     }
 
     return tokens
   } catch (error) {
     console.error("REFRESH_TOKEN: Error refreshing token:", error)
 
-    // If the refresh token is invalid, we need to mark it as such in the database
-    // This will prompt the user to reconnect their Google account
     if (error.message?.includes("invalid_grant")) {
       console.log("REFRESH_TOKEN: Invalid grant error, marking token as invalid")
       await supabase
@@ -247,7 +236,6 @@ export async function processAndStoreAnalyticsData(
   console.log(`PROCESS_DATA: Processing analytics data for user ${userId}`)
   const supabase = await createClient()
 
-  // Get the user's GA account to get property_id
   const { data: gaAccount } = await supabase.from("ga_accounts").select("ga_property_id").eq("user_id", userId).single()
 
   if (!gaAccount) {
@@ -260,7 +248,6 @@ export async function processAndStoreAnalyticsData(
   const dailyMetrics = data.mainReport.rows || []
   console.log(`PROCESS_DATA: Processing ${dailyMetrics.length} daily metrics rows`)
 
-  // Process referrers with date dimension
   const referrersByDate: Record<string, { source: string; visitors: number }[]> = {}
   if (data.referrers.rows) {
     console.log(`PROCESS_DATA: Processing ${data.referrers.rows.length} referrers rows`)
@@ -271,7 +258,6 @@ export async function processAndStoreAnalyticsData(
       }
 
       const date = row.dimensionValues[0].value!
-      // FIX: Properly format the date as YYYY-MM-DD
       const formattedDate = formatGoogleAnalyticsDate(date)
       const source = row.dimensionValues[1].value!
 
@@ -289,14 +275,9 @@ export async function processAndStoreAnalyticsData(
       referrersByDate[formattedDate].push({ source, visitors })
     })
 
-    // Debug log to check if referrers are being processed correctly
     console.log(`PROCESS_DATA: Processed referrers for ${Object.keys(referrersByDate).length} dates`)
-    for (const date in referrersByDate) {
-      console.log(`PROCESS_DATA: Date ${date} has ${referrersByDate[date].length} referrers`)
-    }
   }
 
-  // Process top pages with date dimension
   const pagesByDate: Record<string, { pagePath: string; pageViews: number; avgEngagementTime: number }[]> = {}
   if (data.pages.rows) {
     console.log(`PROCESS_DATA: Processing ${data.pages.rows.length} pages rows`)
@@ -307,7 +288,6 @@ export async function processAndStoreAnalyticsData(
       }
 
       const date = row.dimensionValues[0].value!
-      // FIX: Properly format the date as YYYY-MM-DD
       const formattedDate = formatGoogleAnalyticsDate(date)
       const pagePath = row.dimensionValues[1].value!
 
@@ -326,14 +306,9 @@ export async function processAndStoreAnalyticsData(
       pagesByDate[formattedDate].push({ pagePath, pageViews, avgEngagementTime })
     })
 
-    // Debug log to check if pages are being processed correctly
     console.log(`PROCESS_DATA: Processed pages for ${Object.keys(pagesByDate).length} dates`)
-    for (const date in pagesByDate) {
-      console.log(`PROCESS_DATA: Date ${date} has ${pagesByDate[date].length} pages`)
-    }
   }
 
-  // NEW: Process geographic data
   const geographicByDate: Record<
     string,
     { country: string; countryCode: string; city: string; visitors: number; pageViews: number }[]
@@ -370,7 +345,6 @@ export async function processAndStoreAnalyticsData(
     console.log(`PROCESS_DATA: Processed geographic data for ${Object.keys(geographicByDate).length} dates`)
   }
 
-  // NEW: Process device data
   const deviceByDate: Record<
     string,
     { deviceCategory: string; browser: string; operatingSystem: string; visitors: number; pageViews: number }[]
@@ -414,7 +388,6 @@ export async function processAndStoreAnalyticsData(
       continue
     }
     const date = row.dimensionValues[0].value
-    // FIX: Properly format the date as YYYY-MM-DD
     const formattedDate = formatGoogleAnalyticsDate(date)
 
     if (!row.metricValues || row.metricValues.length < 4) {
@@ -428,7 +401,6 @@ export async function processAndStoreAnalyticsData(
 
     console.log(`PROCESS_DATA: Processing data for date ${formattedDate}: visitors=${visitors}, pageViews=${pageViews}`)
 
-    // Check if we already have data for this date
     const { data: existingData, error: checkError } = await supabase
       .from("daily_analytics")
       .select("id")
@@ -442,7 +414,6 @@ export async function processAndStoreAnalyticsData(
     }
 
     if (existingData) {
-      // Update existing record
       console.log(`PROCESS_DATA: Updating existing record for date ${formattedDate}`)
       const { error: updateError } = await supabase
         .from("daily_analytics")
@@ -461,20 +432,18 @@ export async function processAndStoreAnalyticsData(
         continue
       }
 
-      // Delete existing referrers, top pages, geographic, and device data
       await supabase.from("referrers").delete().eq("daily_analytics_id", existingData.id)
       await supabase.from("top_pages").delete().eq("daily_analytics_id", existingData.id)
       await supabase.from("geographic_analytics").delete().eq("daily_analytics_id", existingData.id)
       await supabase.from("device_analytics").delete().eq("daily_analytics_id", existingData.id)
 
-      // Insert new referrers for this day
       const referrersForDay = referrersByDate[formattedDate] || []
       if (referrersForDay.length > 0) {
         console.log(`PROCESS_DATA: Inserting ${referrersForDay.length} referrers for date ${formattedDate}`)
         const { error: referrersError } = await supabase.from("referrers").insert(
           referrersForDay.map((referrer) => ({
             daily_analytics_id: existingData.id,
-            user_id: userId, // Add user_id
+            user_id: userId,
             source: referrer.source,
             visitors: referrer.visitors,
             date: formattedDate,
@@ -487,7 +456,6 @@ export async function processAndStoreAnalyticsData(
         }
       }
 
-      // Insert new top pages for this day
       const pagesForDay = pagesByDate[formattedDate] || []
       if (pagesForDay.length > 0) {
         console.log(`PROCESS_DATA: Inserting ${pagesForDay.length} top pages for date ${formattedDate}`)
@@ -508,7 +476,6 @@ export async function processAndStoreAnalyticsData(
         }
       }
 
-      // NEW: Insert geographic data for this day
       const geographicForDay = geographicByDate[formattedDate] || []
       if (geographicForDay.length > 0) {
         console.log(`PROCESS_DATA: Inserting ${geographicForDay.length} geographic records for date ${formattedDate}`)
@@ -531,7 +498,6 @@ export async function processAndStoreAnalyticsData(
         }
       }
 
-      // NEW: Insert device data for this day
       const deviceForDay = deviceByDate[formattedDate] || []
       if (deviceForDay.length > 0) {
         console.log(`PROCESS_DATA: Inserting ${deviceForDay.length} device records for date ${formattedDate}`)
@@ -554,7 +520,6 @@ export async function processAndStoreAnalyticsData(
         }
       }
     } else {
-      // Insert new record
       console.log(`PROCESS_DATA: Inserting new record for date ${formattedDate}`)
       const { data: dailyAnalytics, error: dailyError } = await supabase
         .from("daily_analytics")
@@ -577,14 +542,13 @@ export async function processAndStoreAnalyticsData(
         continue
       }
 
-      // Insert referrers for this day
       const referrersForDay = referrersByDate[formattedDate] || []
       if (referrersForDay.length > 0) {
         console.log(`PROCESS_DATA: Inserting ${referrersForDay.length} referrers for date ${formattedDate}`)
         const { error: referrersError } = await supabase.from("referrers").insert(
           referrersForDay.map((referrer) => ({
             daily_analytics_id: dailyAnalytics.id,
-            user_id: userId, // Add user_id
+            user_id: userId,
             source: referrer.source,
             visitors: referrer.visitors,
             date: formattedDate,
@@ -597,7 +561,6 @@ export async function processAndStoreAnalyticsData(
         }
       }
 
-      // Insert top pages for this day
       const pagesForDay = pagesByDate[formattedDate] || []
       if (pagesForDay.length > 0) {
         console.log(`PROCESS_DATA: Inserting ${pagesForDay.length} top pages for date ${formattedDate}`)
@@ -618,7 +581,6 @@ export async function processAndStoreAnalyticsData(
         }
       }
 
-      // NEW: Insert geographic data for this day
       const geographicForDay = geographicByDate[formattedDate] || []
       if (geographicForDay.length > 0) {
         console.log(`PROCESS_DATA: Inserting ${geographicForDay.length} geographic records for date ${formattedDate}`)
@@ -641,7 +603,6 @@ export async function processAndStoreAnalyticsData(
         }
       }
 
-      // NEW: Insert device data for this day
       const deviceForDay = deviceByDate[formattedDate] || []
       if (deviceForDay.length > 0) {
         console.log(`PROCESS_DATA: Inserting ${deviceForDay.length} device records for date ${formattedDate}`)
@@ -667,215 +628,37 @@ export async function processAndStoreAnalyticsData(
   }
 
   // Verify data was stored
-  const { data: verifyData, error: verifyError } = await supabase
-    .from("daily_analytics")
-    .select("count")
-    .eq("user_id", userId)
+  const { data: verifyData } = await supabase.from("daily_analytics").select("count").eq("user_id", userId)
 
-  if (verifyError) {
-    console.error("PROCESS_DATA: Error verifying data:", verifyError)
-  } else {
-    console.log(`PROCESS_DATA: Verified ${verifyData?.[0]?.count || 0} records stored in daily_analytics`)
-  }
+  console.log(`PROCESS_DATA: Verified ${verifyData?.[0]?.count || 0} records stored in daily_analytics`)
 
-  // Verify top pages were stored
-  const { data: verifyPages, error: verifyPagesError } = await supabase
-    .from("top_pages")
-    .select("count")
-    .eq("user_id", userId)
-
-  if (verifyPagesError) {
-    console.error("PROCESS_DATA: Error verifying top pages:", verifyPagesError)
-  } else {
-    console.log(`PROCESS_DATA: Verified ${verifyPages?.[0]?.count || 0} records stored in top_pages`)
-  }
-
-  // Verify referrers were stored
-  const { data: verifyReferrers, error: verifyReferrersError } = await supabase
-    .from("referrers")
-    .select("count")
-    .eq("user_id", userId)
-
-  if (verifyReferrersError) {
-    console.error("PROCESS_DATA: Error verifying referrers:", verifyReferrersError)
-  } else {
-    console.log(`PROCESS_DATA: Verified ${verifyReferrers?.[0]?.count || 0} records stored in referrers`)
-  }
-
-  // NEW: Verify geographic data was stored
-  const { data: verifyGeographic, error: verifyGeographicError } = await supabase
-    .from("geographic_analytics")
-    .select("count")
-    .eq("user_id", userId)
-
-  if (verifyGeographicError) {
-    console.error("PROCESS_DATA: Error verifying geographic data:", verifyGeographicError)
-  } else {
-    console.log(`PROCESS_DATA: Verified ${verifyGeographic?.[0]?.count || 0} records stored in geographic_analytics`)
-  }
-
-  // NEW: Verify device data was stored
-  const { data: verifyDevice, error: verifyDeviceError } = await supabase
-    .from("device_analytics")
-    .select("count")
-    .eq("user_id", userId)
-
-  if (verifyDeviceError) {
-    console.error("PROCESS_DATA: Error verifying device data:", verifyDeviceError)
-  } else {
-    console.log(`PROCESS_DATA: Verified ${verifyDevice?.[0]?.count || 0} records stored in device_analytics`)
-  }
-
-  await detectAndStoreEvents(userId)
+  // NEW: Call event detection after processing data
+  console.log("PROCESS_DATA: Starting event detection...")
+  await detectAndStoreWeeklyEvents(userId)
 
   return true
 }
 
-// Add this helper function to properly format Google Analytics dates
 function formatGoogleAnalyticsDate(gaDate: string): string {
-  // Google Analytics returns dates in format YYYYMMDD (e.g., 20250417)
-  // We need to convert it to YYYY-MM-DD
   console.log(`Formatting GA date: ${gaDate}`)
 
   if (gaDate.length === 8) {
-    // Format is YYYYMMDD
     const year = gaDate.substring(0, 4)
     const month = gaDate.substring(4, 6)
     const day = gaDate.substring(6, 8)
     return `${year}-${month}-${day}`
   } else if (gaDate.includes("-")) {
-    // If it's already in YYYY-MM format, add the day
     if (gaDate.length === 7) {
       return `${gaDate}-01`
     }
-    // If it's already in YYYY-MM-DD format, return as is
     return gaDate
   } else {
-    // For any other format, log an error and return a fallback date
     console.error(`PROCESS_DATA: Invalid date format from Google Analytics: ${gaDate}`)
-    return new Date().toISOString().split("T")[0] // Today's date as fallback
+    return new Date().toISOString().split("T")[0]
   }
 }
 
-// Detect and store events
-async function detectAndStoreEvents(userId: string) {
-  const supabase = await createClient()
-
-  const endDate = new Date()
-  const startDate = subDays(endDate, 30)
-
-  const { data: analytics, error } = await supabase
-    .from("daily_analytics")
-    .select("*")
-    .eq("user_id", userId)
-    .gte("date", format(startDate, "yyyy-MM-dd"))
-    .lte("date", format(endDate, "yyyy-MM-dd"))
-    .order("date", { ascending: true })
-
-  if (error) {
-    console.error("Error fetching analytics for event detection:", error)
-    return
-  }
-
-  // Return early if no data found
-  if (!analytics || analytics.length === 0) {
-    console.log("No analytics data found for event detection, skipping")
-    return
-  }
-
-  for (let i = 1; i < analytics.length; i++) {
-    const yesterday = analytics[i - 1]
-    const today = analytics[i]
-
-    if (yesterday.visitors > 0 && today.visitors > yesterday.visitors * 1.5) {
-      await supabase.from("events").upsert({
-        user_id: userId,
-        date: today.date,
-        event_type: "spike",
-        title: "Traffic Spike",
-        description: `Your traffic increased by ${Math.round(((today.visitors - yesterday.visitors) / yesterday.visitors) * 100)}% from yesterday`,
-        value: today.visitors,
-        created_at: new Date().toISOString(),
-      })
-    }
-  }
-
-  const milestones = [100, 500, 1000, 5000, 10000]
-  for (const milestone of milestones) {
-    for (let i = 1; i < analytics.length; i++) {
-      const yesterday = analytics[i - 1]
-      const today = analytics[i]
-
-      if (yesterday.visitors < milestone && today.visitors >= milestone) {
-        await supabase.from("events").upsert({
-          user_id: userId,
-          date: today.date,
-          event_type: "milestone",
-          title: `${milestone} Visitors Milestone`,
-          description: `Congratulations! Your site reached ${milestone} visitors in a day`,
-          value: today.visitors,
-          created_at: new Date().toISOString(),
-        })
-      }
-    }
-  }
-
-  for (let i = 1; i < analytics.length; i++) {
-    const yesterday = analytics[i - 1]
-    const today = analytics[i]
-
-    if (yesterday.visitors > 10 && today.visitors < yesterday.visitors * 0.7) {
-      await supabase.from("events").upsert({
-        user_id: userId,
-        date: today.date,
-        event_type: "drop",
-        title: "Traffic Drop",
-        description: `Your traffic decreased by ${Math.round(((yesterday.visitors - today.visitors) / yesterday.visitors) * 100)}% from yesterday`,
-        value: today.visitors,
-        created_at: new Date().toISOString(),
-      })
-    }
-  }
-
-  let streakDays = 1
-  let streakStart = 0
-
-  for (let i = 1; i < analytics.length; i++) {
-    if (analytics[i].visitors > analytics[i - 1].visitors) {
-      streakDays++
-      if (streakDays === 2) streakStart = i - 1
-    } else {
-      if (streakDays >= 5) {
-        await supabase.from("events").upsert({
-          user_id: userId,
-          date: analytics[i - 1].date,
-          event_type: "streak",
-          title: `${streakDays} Day Growth Streak`,
-          description: `Your site had ${streakDays} consecutive days of traffic growth`,
-          value: streakDays,
-          created_at: new Date().toISOString(),
-        })
-      }
-      streakDays = 1
-    }
-  }
-
-  if (streakDays >= 5) {
-    await supabase.from("events").upsert({
-      user_id: userId,
-      date: analytics[analytics.length - 1].date,
-      event_type: "streak",
-      title: `${streakDays} Day Growth Streak`,
-      description: `Your site had ${streakDays} consecutive days of traffic growth`,
-      value: streakDays,
-      created_at: new Date().toISOString(),
-    })
-  }
-
-  return true
-}
-
-// Cache the analytics data fetching
+// Fetch analytics for date range
 export const fetchAnalyticsForDateRange = cache(async (userId: string, startDate: string, endDate: string) => {
   console.log(`FETCH_DATA: Fetching analytics from Supabase for date range ${startDate} to ${endDate}`)
   const supabase = await createClient()
@@ -897,7 +680,7 @@ export const fetchAnalyticsForDateRange = cache(async (userId: string, startDate
   return analytics || []
 })
 
-// Cache the events data fetching
+// Fetch events for date range
 export const fetchEventsForDateRange = cache(async (userId: string, startDate: string, endDate: string) => {
   console.log(`FETCH_DATA: Fetching events from Supabase for date range ${startDate} to ${endDate}`)
   const supabase = await createClient()
@@ -908,7 +691,7 @@ export const fetchEventsForDateRange = cache(async (userId: string, startDate: s
     .eq("user_id", userId)
     .gte("date", startDate)
     .lte("date", endDate)
-    .order("date", { ascending: true })
+    .order("date", { ascending: false })
 
   if (error) {
     console.error("FETCH_DATA: Error fetching events from Supabase:", error)
@@ -919,13 +702,12 @@ export const fetchEventsForDateRange = cache(async (userId: string, startDate: s
   return events || []
 })
 
-// Cache the referrers data fetching
+// Fetch referrers for date range
 export const fetchReferrersForDateRange = cache(async (userId: string, startDate: string, endDate: string) => {
   console.log(`FETCH_DATA: Fetching referrers from Supabase for date range ${startDate} to ${endDate}`)
   const supabase = await createClient()
 
   try {
-    // First, get the daily_analytics IDs for the date range
     const { data: analytics, error: analyticsError } = await supabase
       .from("daily_analytics")
       .select("id")
@@ -945,7 +727,6 @@ export const fetchReferrersForDateRange = cache(async (userId: string, startDate
 
     const analyticsIds = analytics.map((item) => item.id)
 
-    // Then, get the referrers for those IDs
     const { data: referrers, error: referrersError } = await supabase
       .from("referrers")
       .select("source, visitors")
@@ -956,7 +737,6 @@ export const fetchReferrersForDateRange = cache(async (userId: string, startDate
       return []
     }
 
-    // Properly aggregate referrers by source
     const aggregatedReferrers: Record<string, number> = {}
     for (const referrer of referrers || []) {
       if (referrer.source && referrer.visitors) {
@@ -981,14 +761,11 @@ export const fetchReferrersForDateRange = cache(async (userId: string, startDate
   }
 })
 
-// Update the fetchTopPagesForDateRange function to include avg_engagement_time
-
 export const fetchTopPagesForDateRange = cache(async (userId: string, startDate: string, endDate: string) => {
   console.log(`FETCH_DATA: Fetching top pages from Supabase for date range ${startDate} to ${endDate}`)
   const supabase = await createClient()
 
   try {
-    // First, get the daily_analytics IDs for the date range
     const { data: analytics, error: analyticsError } = await supabase
       .from("daily_analytics")
       .select("id")
@@ -1008,7 +785,6 @@ export const fetchTopPagesForDateRange = cache(async (userId: string, startDate:
 
     const analyticsIds = analytics.map((item) => item.id)
 
-    // Then, get the top pages for those IDs
     const { data: pages, error: pagesError } = await supabase
       .from("top_pages")
       .select("page_path, page_views, avg_engagement_time")
@@ -1019,7 +795,6 @@ export const fetchTopPagesForDateRange = cache(async (userId: string, startDate:
       return []
     }
 
-    // Properly aggregate pages by path
     const aggregatedPages: Record<string, { views: number; engagementTimes: number[]; totalEngagementTime: number }> =
       {}
 
@@ -1035,7 +810,6 @@ export const fetchTopPagesForDateRange = cache(async (userId: string, startDate:
 
         aggregatedPages[page.page_path].views += page.page_views
 
-        // If we have engagement time data, add it
         if (page.avg_engagement_time) {
           aggregatedPages[page.page_path].engagementTimes.push(page.avg_engagement_time)
           aggregatedPages[page.page_path].totalEngagementTime += page.avg_engagement_time
@@ -1043,7 +817,6 @@ export const fetchTopPagesForDateRange = cache(async (userId: string, startDate:
       }
     }
 
-    // Calculate average engagement time and format the result
     const result = Object.entries(aggregatedPages)
       .map(([page_path, data]) => {
         const avg_engagement_time =
@@ -1056,7 +829,7 @@ export const fetchTopPagesForDateRange = cache(async (userId: string, startDate:
         }
       })
       .sort((a, b) => b.page_views - a.page_views)
-      .slice(0, 50) // Get more to allow for expansion
+      .slice(0, 50)
 
     console.log(`FETCH_DATA: Successfully aggregated ${result.length} top pages from Supabase`)
     return result
@@ -1066,7 +839,6 @@ export const fetchTopPagesForDateRange = cache(async (userId: string, startDate:
   }
 })
 
-// Add this new function to the file - keep all existing code
 export const fetchTopPagesWithEngagementForDateRange = cache(
   async (userId: string, startDate: string, endDate: string) => {
     console.log(
@@ -1075,7 +847,6 @@ export const fetchTopPagesWithEngagementForDateRange = cache(
     const supabase = await createClient()
 
     try {
-      // First, get the daily_analytics IDs for the date range
       const { data: analytics, error: analyticsError } = await supabase
         .from("daily_analytics")
         .select("id")
@@ -1095,7 +866,6 @@ export const fetchTopPagesWithEngagementForDateRange = cache(
 
       const analyticsIds = analytics.map((item) => item.id)
 
-      // Then, get the top pages for those IDs
       const { data: pages, error: pagesError } = await supabase
         .from("top_pages")
         .select("page_path, page_views, avg_engagement_time")
@@ -1106,7 +876,6 @@ export const fetchTopPagesWithEngagementForDateRange = cache(
         return []
       }
 
-      // Properly aggregate pages by path
       const aggregatedPages: Record<string, { views: number; engagementTimes: number[]; totalEngagementTime: number }> =
         {}
 
@@ -1122,7 +891,6 @@ export const fetchTopPagesWithEngagementForDateRange = cache(
 
           aggregatedPages[page.page_path].views += page.page_views
 
-          // If we have engagement time data, add it
           if (page.avg_engagement_time) {
             aggregatedPages[page.page_path].engagementTimes.push(page.avg_engagement_time)
             aggregatedPages[page.page_path].totalEngagementTime += page.avg_engagement_time
@@ -1130,7 +898,6 @@ export const fetchTopPagesWithEngagementForDateRange = cache(
         }
       }
 
-      // Calculate average engagement time and format the result
       const result = Object.entries(aggregatedPages)
         .map(([page_path, data]) => {
           const avg_engagement_time =
@@ -1143,7 +910,7 @@ export const fetchTopPagesWithEngagementForDateRange = cache(
           }
         })
         .sort((a, b) => b.page_views - a.page_views)
-        .slice(0, 50) // Get top 50 to allow for expansion
+        .slice(0, 50)
 
       console.log(`FETCH_DATA: Successfully aggregated ${result.length} top pages with engagement from Supabase`)
       return result
@@ -1154,7 +921,6 @@ export const fetchTopPagesWithEngagementForDateRange = cache(
   },
 )
 
-// NEW: Fetch geographic data for date range
 export const fetchGeographicDataForDateRange = cache(async (userId: string, startDate: string, endDate: string) => {
   console.log(`FETCH_DATA: Fetching geographic data from Supabase for date range ${startDate} to ${endDate}`)
   const supabase = await createClient()
@@ -1172,7 +938,6 @@ export const fetchGeographicDataForDateRange = cache(async (userId: string, star
       return []
     }
 
-    // Aggregate by country
     const countryStats: Record<string, { visitors: number; pageViews: number; cities: Set<string> }> = {}
 
     for (const geo of geographic || []) {
@@ -1209,7 +974,6 @@ export const fetchGeographicDataForDateRange = cache(async (userId: string, star
   }
 })
 
-// NEW: Fetch device data for date range
 export const fetchDeviceDataForDateRange = cache(async (userId: string, startDate: string, endDate: string) => {
   console.log(`FETCH_DATA: Fetching device data from Supabase for date range ${startDate} to ${endDate}`)
   const supabase = await createClient()
@@ -1227,23 +991,19 @@ export const fetchDeviceDataForDateRange = cache(async (userId: string, startDat
       return []
     }
 
-    // Aggregate by device category
     const deviceStats: Record<string, number> = {}
     const browserStats: Record<string, number> = {}
     const osStats: Record<string, number> = {}
 
     for (const device of devices || []) {
-      // Device category aggregation
       if (device.device_category) {
         deviceStats[device.device_category] = (deviceStats[device.device_category] || 0) + device.visitors
       }
 
-      // Browser aggregation
       if (device.browser) {
         browserStats[device.browser] = (browserStats[device.browser] || 0) + device.visitors
       }
 
-      // OS aggregation
       if (device.operating_system) {
         osStats[device.operating_system] = (osStats[device.operating_system] || 0) + device.visitors
       }
