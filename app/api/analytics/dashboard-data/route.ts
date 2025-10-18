@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`Fetching data for user ${user.id} from ${startDate} to ${endDate}`)
 
-    // Try to fetch analytics data
+    // Fetch analytics data
     const { data: analyticsData, error: analyticsError } = await supabase
       .from("daily_analytics")
       .select("*")
@@ -39,10 +39,9 @@ export async function GET(request: NextRequest) {
 
     if (analyticsError) {
       console.error("Analytics error:", analyticsError)
-      // Don't fail completely, just return empty data
     }
 
-    // Try to fetch events
+    // Fetch events
     const { data: events, error: eventsError } = await supabase
       .from("events")
       .select("*")
@@ -53,10 +52,9 @@ export async function GET(request: NextRequest) {
 
     if (eventsError) {
       console.error("Events error:", eventsError)
-      // Don't fail completely
     }
 
-    // Try to fetch referrers
+    // Fetch referrers
     const { data: referrersData, error: referrersError } = await supabase
       .from("referrers")
       .select("*")
@@ -66,7 +64,6 @@ export async function GET(request: NextRequest) {
 
     if (referrersError) {
       console.error("Referrers error:", referrersError)
-      // Don't fail completely
     }
 
     // Aggregate referrers
@@ -82,7 +79,7 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.visitors - a.visitors)
       .slice(0, 10)
 
-    // Try to fetch top pages
+    // Fetch top pages
     const { data: topPagesData, error: topPagesError } = await supabase
       .from("top_pages")
       .select("*")
@@ -92,7 +89,6 @@ export async function GET(request: NextRequest) {
 
     if (topPagesError) {
       console.error("Top pages error:", topPagesError)
-      // Don't fail completely
     }
 
     // Aggregate top pages
@@ -108,10 +104,10 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.page_views - a.page_views)
       .slice(0, 10)
 
-    // NEW: Fetch geographic data
+    // Fetch geographic data
     const geographicData = await fetchGeographicDataForDateRange(user.id, startDate, endDate)
 
-    // NEW: Fetch device data
+    // Fetch device data
     const deviceData = await fetchDeviceDataForDateRange(user.id, startDate, endDate)
 
     // Calculate stats
@@ -126,15 +122,17 @@ export async function GET(request: NextRequest) {
         ? analyticsData.reduce((sum, item) => sum + (item.avg_session_duration || 0), 0) / analyticsData.length
         : 0
 
-    console.log(`Returning data: ${analyticsData?.length || 0} analytics records`)
+    console.log(`Analytics records: ${analyticsData?.length || 0}`)
+    console.log(`Total visitors: ${totalVisitors}`)
+    console.log(`Date range: ${startDate} to ${endDate}`)
 
     return NextResponse.json({
       analyticsData: analyticsData || [],
       events: events || [],
       referrers,
       topPages,
-      geographicData,
-      deviceData,
+      geographicData: geographicData || [],
+      deviceData: deviceData || [],
       stats: {
         totalVisitors,
         totalPageViews,
