@@ -105,21 +105,18 @@ const contentThemes = [
   { id: "content-gray", name: "Gray", backgroundColor: "#F9FAFB", textColor: "#111827" },
 ]
 
-// Update the layout templates array to remove the unnecessary layouts
 const layoutTemplates = [
   { id: "standard", name: "Standard", description: "Stats with chart" },
   { id: "minimal", name: "Minimal", description: "Single metric with chart" },
   { id: "custom", name: "Custom", description: "Build your own layout" },
 ]
 
-// Update the chart types array to remove pie chart
 const chartTypes = [
   { id: "area", name: "Area Chart", description: "Show volume over time" },
   { id: "line", name: "Line Chart", description: "Visualize trends over time" },
   { id: "bar", name: "Bar Chart", description: "Compare values across categories" },
 ]
 
-// Add a new component type for the combined metrics view
 const componentTypes = [
   { id: "metrics-header", name: "Metrics Header", type: "header" },
   { id: "multi-metric-chart", name: "Multi-Metric Chart", type: "chart" },
@@ -356,29 +353,33 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
     avg_session_duration: "#f472b6", // pink-400
   }
 
-  // Render metrics header
+  // Render metrics header - OPTIMIZED FOR MOBILE
   const renderMetricsHeader = () => {
     const contentStyles = getContentThemeStyles()
 
     return (
-      <div className="flex flex-wrap gap-3 mb-3 justify-between">
-        <div className="text-sm font-medium" style={{ color: metricColors.visitors }}>
-          Visitors: {totalVisitors.toLocaleString()}
+      <div className="flex flex-wrap gap-2 mb-3 justify-between text-xs sm:text-sm">
+        <div className="font-medium" style={{ color: metricColors.visitors }}>
+          <span className="block">Visitors</span>
+          <span className="font-bold text-sm sm:text-base">{(totalVisitors / 1000).toFixed(1)}K</span>
         </div>
-        <div className="text-sm font-medium" style={{ color: metricColors.page_views }}>
-          Page Views: {totalPageViews.toLocaleString()}
+        <div className="font-medium" style={{ color: metricColors.page_views }}>
+          <span className="block">Page Views</span>
+          <span className="font-bold text-sm sm:text-base">{(totalPageViews / 1000).toFixed(1)}K</span>
         </div>
-        <div className="text-sm font-medium" style={{ color: metricColors.avg_session_duration }}>
-          Avg Session: {formatSessionDuration(avgSessionDuration)}
+        <div className="font-medium" style={{ color: metricColors.avg_session_duration }}>
+          <span className="block">Avg Session</span>
+          <span className="font-bold text-sm sm:text-base">{(avgSessionDuration / 60).toFixed(1)} min</span>
         </div>
-        <div className="text-sm font-medium" style={{ color: metricColors.bounce_rate }}>
-          Bounce Rate: {avgBounceRate.toFixed(1)}%
+        <div className="font-medium" style={{ color: metricColors.bounce_rate }}>
+          <span className="block">Bounce Rate</span>
+          <span className="font-bold text-sm sm:text-base">{avgBounceRate.toFixed(1)}%</span>
         </div>
       </div>
     )
   }
 
-  // Render multi-metric chart
+  // Render multi-metric chart - OPTIMIZED FOR MOBILE
   const renderMultiMetricChart = () => {
     const contentStyles = getContentThemeStyles()
 
@@ -404,17 +405,17 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
 
       return (
         <div
-          className="rounded-lg border p-2 shadow-md"
+          className="rounded border p-2 shadow-md text-xs"
           style={{
             backgroundColor: contentStyles.backgroundColor,
             color: contentStyles.color,
             borderColor: "rgba(0,0,0,0.1)",
           }}
         >
-          <div className="space-y-1">
-            <p className="text-sm font-medium">{format(new Date(label), "MMM dd")}</p>
+          <div className="space-y-0.5">
+            <p className="font-medium">{format(new Date(label), "MMM dd")}</p>
             {payload.map((item: any, i: number) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={i} className="flex items-center gap-1">
                 <span style={{ color: item.color }} className="mr-1">
                   •
                 </span>
@@ -445,7 +446,7 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
     const renderChart = () => {
       const commonProps = {
         data: formattedData,
-        margin: { top: 10, right: 10, left: 0, bottom: 0 },
+        margin: { top: 5, right: 5, left: -20, bottom: 0 },
       }
 
       switch (selectedChartType) {
@@ -464,11 +465,17 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
                 dataKey="date"
                 axisLine={false}
                 tickLine={false}
-                dy={10}
-                tick={{ fontSize: 12, fill: contentStyles.color }}
+                dy={5}
+                tick={{ fontSize: 10, fill: contentStyles.color }}
                 tickFormatter={(value) => format(new Date(value), "MMM d")}
               />
-              <YAxis axisLine={false} tickLine={false} dx={-10} tick={{ fontSize: 12, fill: contentStyles.color }} />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                dx={-5}
+                tick={{ fontSize: 10, fill: contentStyles.color }}
+                width={30}
+              />
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.1)" />
               <Tooltip content={<CustomTooltip />} />
               {metrics.map((metric) => (
@@ -479,7 +486,7 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
                   name={metric.name}
                   stroke={metric.color}
                   fill={`url(#color-${metric.key})`}
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   fillOpacity={0.3}
                 />
               ))}
@@ -492,11 +499,17 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
                 dataKey="date"
                 axisLine={false}
                 tickLine={false}
-                dy={10}
-                tick={{ fontSize: 12, fill: contentStyles.color }}
+                dy={5}
+                tick={{ fontSize: 10, fill: contentStyles.color }}
                 tickFormatter={(value) => format(new Date(value), "MMM d")}
               />
-              <YAxis axisLine={false} tickLine={false} dx={-10} tick={{ fontSize: 12, fill: contentStyles.color }} />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                dx={-5}
+                tick={{ fontSize: 10, fill: contentStyles.color }}
+                width={30}
+              />
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.1)" />
               <Tooltip content={<CustomTooltip />} />
               {metrics.map((metric) => (
@@ -505,8 +518,8 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
                   dataKey={metric.key}
                   name={metric.name}
                   fill={metric.color}
-                  radius={[4, 4, 0, 0]}
-                  barSize={6}
+                  radius={[2, 2, 0, 0]}
+                  barSize={4}
                 />
               ))}
             </BarChart>
@@ -519,11 +532,17 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
                 dataKey="date"
                 axisLine={false}
                 tickLine={false}
-                dy={10}
-                tick={{ fontSize: 12, fill: contentStyles.color }}
+                dy={5}
+                tick={{ fontSize: 10, fill: contentStyles.color }}
                 tickFormatter={(value) => format(new Date(value), "MMM d")}
               />
-              <YAxis axisLine={false} tickLine={false} dx={-10} tick={{ fontSize: 12, fill: contentStyles.color }} />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                dx={-5}
+                tick={{ fontSize: 10, fill: contentStyles.color }}
+                width={30}
+              />
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.1)" />
               <Tooltip content={<CustomTooltip />} />
               {metrics.map((metric) => (
@@ -533,9 +552,9 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
                   dataKey={metric.key}
                   name={metric.name}
                   stroke={metric.color}
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: metric.color }}
-                  activeDot={{ r: 5, fill: metric.color }}
+                  strokeWidth={1.5}
+                  dot={{ r: 2, fill: metric.color }}
+                  activeDot={{ r: 3, fill: metric.color }}
                 />
               ))}
             </LineChart>
@@ -545,7 +564,7 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
 
     return (
       <div style={{ color: contentStyles.color }}>
-        <div style={{ height: "300px", width: "100%" }}>
+        <div style={{ height: "200px", width: "100%" }}>
           <ResponsiveContainer width="100%" height="100%">
             {renderChart()}
           </ResponsiveContainer>
@@ -554,7 +573,7 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
     )
   }
 
-  // Update the renderContent function to include the combined metrics view for standard and minimal layouts
+  // Update the renderContent function - OPTIMIZED FOR MOBILE
   const renderContent = () => {
     const contentStyles = getContentThemeStyles()
     const hasData = safeData.length > 0
@@ -562,14 +581,14 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
     switch (selectedLayout) {
       case "standard":
         return (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {renderMetricsHeader()}
             {!hasData && (
-              <div className="text-sm opacity-70 p-3 rounded border">
+              <div className="text-xs opacity-70 p-2 rounded border">
                 No analytics data yet. Try adjusting the date range or refreshing data.
               </div>
             )}
-            <div className="mt-2 text-sm opacity-70" style={{ color: contentStyles.color }}>
+            <div className="text-xs opacity-70" style={{ color: contentStyles.color }}>
               {getDateRangeText()}
             </div>
             {renderMultiMetricChart()}
@@ -577,14 +596,14 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
         )
       case "minimal":
         return (
-          <div className="space-y-4" style={contentStyles}>
+          <div className="space-y-2" style={contentStyles}>
             <div className="text-center">
-              <div className="text-5xl font-bold">{totalVisitors}</div>
-              <div className="text-sm opacity-70 mt-1">Total Visitors</div>
+              <div className="text-3xl sm:text-4xl font-bold">{totalVisitors}</div>
+              <div className="text-xs opacity-70 mt-1">Total Visitors</div>
             </div>
-            <div className="mt-2 text-center text-sm opacity-70">{getDateRangeText()}</div>
+            <div className="text-center text-xs opacity-70">{getDateRangeText()}</div>
             {!hasData && (
-              <div className="text-sm opacity-70 p-3 rounded border">
+              <div className="text-xs opacity-70 p-2 rounded border">
                 No analytics data yet. Try adjusting the date range or refreshing data.
               </div>
             )}
@@ -593,13 +612,13 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
         )
       case "custom":
         return (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {customComponents.length === 0 ? (
-              <div className="text-center p-6 border border-dashed rounded-lg" style={contentStyles}>
+              <div className="text-center p-3 border border-dashed rounded-lg text-xs" style={contentStyles}>
                 <p className="opacity-70">Add components from the sidebar to create your custom layout</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-2">
                 {customComponents.map((component) => renderCustomComponent(component))}
               </div>
             )}
@@ -610,7 +629,7 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
     }
   }
 
-  // Update the renderCustomComponent function to handle the combined metrics component
+  // Update the renderCustomComponent function
   const renderCustomComponent = (component: CustomComponent) => {
     const contentStyles = getContentThemeStyles()
 
@@ -619,7 +638,7 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
         <div key={component.id} className="relative group">
           {renderMetricsHeader()}
           <button
-            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
             onClick={() => removeComponent(component.id)}
           >
             ×
@@ -631,7 +650,7 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
         <div key={component.id} className="relative group">
           {renderMultiMetricChart()}
           <button
-            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
             onClick={() => removeComponent(component.id)}
           >
             ×
@@ -642,12 +661,12 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
       return (
         <div key={component.id} className="relative group" style={{ color: contentStyles.color }}>
           {component.componentId === "title" ? (
-            <h3 className="text-xl font-bold">{component.props.content}</h3>
+            <h3 className="text-base sm:text-lg font-bold">{component.props.content}</h3>
           ) : (
-            <p className="opacity-70">{component.props.content}</p>
+            <p className="text-xs opacity-70">{component.props.content}</p>
           )}
           <button
-            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
             onClick={() => removeComponent(component.id)}
           >
             ×
@@ -1004,20 +1023,24 @@ export function ScreenshotEditor({ websiteUrl, dateRange, analyticsData = [] }: 
 
       {/* Preview */}
       <div ref={editorRef} className="flex-1 rounded-lg overflow-hidden border">
-        <div ref={previewRef} className="p-6 min-h-[500px] max-w-full overflow-auto" style={getBackgroundStyle()}>
+        <div
+          ref={previewRef}
+          className="p-3 sm:p-4 min-h-[500px] max-w-full overflow-auto"
+          style={getBackgroundStyle()}
+        >
           <div
-            className="bg-white rounded-lg shadow-lg overflow-hidden max-w-3xl mx-auto"
+            className="bg-white rounded-lg shadow-lg overflow-hidden max-w-2xl mx-auto"
             style={getContentThemeStyles()}
           >
-            <div className="p-6">
-              <div className="mb-4">
-                <h3 className="text-xl font-bold">{title}</h3>
-                {description && <p className="opacity-70 mt-1">{description}</p>}
+            <div className="p-3 sm:p-4">
+              <div className="mb-3">
+                <h3 className="text-base sm:text-lg font-bold line-clamp-2">{title}</h3>
+                {description && <p className="text-xs sm:text-sm opacity-70 mt-1 line-clamp-2">{description}</p>}
               </div>
 
               {renderContent()}
 
-              {showLogo && <div className="text-xs opacity-50 text-center mt-4 pb-2">Generated with SnapStats</div>}
+              {showLogo && <div className="text-xs opacity-50 text-center mt-3 pb-2">Generated with SnapStats</div>}
             </div>
           </div>
         </div>
