@@ -183,10 +183,18 @@ const IndieSignalsClient: React.FC = () => {
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - dayRange)
 
+      // Only fetch NEW event types (not old daily spike/drop/streak/milestone)
       const { data: eventsData, error: eventsError } = await supabase
         .from("events")
         .select("*")
         .eq("user_id", user.id)
+        .in("event_type", [
+          "weekly_momentum",
+          "quality_traffic",
+          "referrer_milestone",
+          "growth_acceleration",
+          "referrer_risk",
+        ])
         .gte("date", startDate.toISOString().split("T")[0])
         .lte("date", endDate.toISOString().split("T")[0])
         .order("date", { ascending: false })
@@ -196,7 +204,7 @@ const IndieSignalsClient: React.FC = () => {
         return
       }
 
-      console.log(`Fetched ${eventsData?.length || 0} events for ${dayRange} days`)
+      console.log(`Fetched ${eventsData?.length || 0} weekly insight events for ${dayRange} days`)
       setEvents(eventsData || [])
     } catch (error) {
       console.error("Error in events fetch:", error)
@@ -240,23 +248,6 @@ const IndieSignalsClient: React.FC = () => {
   const handleDayRangeChange = (newRange: 7 | 14 | 30) => {
     if (newRange === dayRange) return
     setDayRange(newRange)
-  }
-
-  const getEventIcon = (eventType: string) => {
-    switch (eventType) {
-      case "weekly_momentum":
-        return eventType.includes("growth") ? "📈" : "📉"
-      case "quality_traffic":
-        return "✨"
-      case "referrer_milestone":
-        return "🔥"
-      case "growth_acceleration":
-        return "🚀"
-      case "referrer_risk":
-        return "⚠️"
-      default:
-        return "📊"
-    }
   }
 
   const getEventBadgeColor = (eventType: string) => {
@@ -579,7 +570,7 @@ const IndieSignalsClient: React.FC = () => {
               <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-600 to-indigo-400 rounded-full"></div>
               <div className="ml-2">
                 <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-2">Key Insights</h2>
-                <p className="text-muted-foreground mb-8">Weekly trends and meaningful patterns in your data</p>
+                <p className="text-muted-foreground mb-8">Meaningful weekly trends and patterns in your data</p>
 
                 <div className="space-y-4">
                   {events.map((event) => (
@@ -587,7 +578,7 @@ const IndieSignalsClient: React.FC = () => {
                       key={event.id || `${event.date}-${event.event_type}`}
                       className="flex items-start gap-4 p-4 border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
                     >
-                      <div className="text-2xl flex-shrink-0 mt-0.5">{getEventIcon(event.event_type)}</div>
+                      <div className="text-2xl flex-shrink-0 mt-0.5">{event.title.charAt(0)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                           <h3 className="font-semibold text-lg">{event.title}</h3>
@@ -601,6 +592,16 @@ const IndieSignalsClient: React.FC = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State for Events */}
+          {events.length === 0 && (
+            <div className="mb-16 relative">
+              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-slate-300 to-slate-200 rounded-full"></div>
+              <div className="ml-2 text-center py-8">
+                <p className="text-muted-foreground">No significant insights yet. Check back next week!</p>
               </div>
             </div>
           )}

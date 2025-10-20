@@ -42,8 +42,27 @@ export async function detectAndStoreWeeklyEvents(userId: string) {
       .gte("date", format(startDate, "yyyy-MM-dd"))
       .lte("date", format(endDate, "yyyy-MM-dd"))
 
-    // Clear old events for this user
-    await supabase.from("events").delete().eq("user_id", userId)
+    // Clear OLD event types (spike, drop, streak) - only keep new weekly ones
+    await supabase
+      .from("events")
+      .delete()
+      .eq("user_id", userId)
+      .in("event_type", ["spike", "drop", "streak", "milestone"])
+
+    // Also clear old weekly events in date range to avoid duplication
+    await supabase
+      .from("events")
+      .delete()
+      .eq("user_id", userId)
+      .in("event_type", [
+        "weekly_momentum",
+        "quality_traffic",
+        "referrer_milestone",
+        "growth_acceleration",
+        "referrer_risk",
+      ])
+      .gte("date", format(startDate, "yyyy-MM-dd"))
+      .lte("date", format(endDate, "yyyy-MM-dd"))
 
     // Organize data by week
     const weeks: Record<string, any> = {}
@@ -110,8 +129,8 @@ export async function detectAndStoreWeeklyEvents(userId: string) {
                 : `📉 ${Math.round(Math.abs(growth))}% decline`,
             description:
               growth > 0
-                ? `This week: ${thisWeek.stats.totalVisitors.toLocaleString()} visitors (was ${lastWeek.stats.totalVisitors.toLocaleString()} last week)`
-                : `This week trending down. ${thisWeek.stats.totalVisitors.toLocaleString()} visitors vs ${lastWeek.stats.totalVisitors.toLocaleString()} last week`,
+                ? `This week: ${thisWeek.stats.totalVisitors.toLocaleString()} visitors (was ${lastWeek.stats.totalVisitors.toLocaleString()} last week). You're on an upward trajectory!`
+                : `This week trending down. ${thisWeek.stats.totalVisitors.toLocaleString()} visitors vs ${lastWeek.stats.totalVisitors.toLocaleString()} last week. Time to investigate what changed.`,
             value: growth,
             metadata: {
               weekNumber: i,
@@ -139,7 +158,7 @@ export async function detectAndStoreWeeklyEvents(userId: string) {
           date: format(week.endDate, "yyyy-MM-dd"),
           event_type: "quality_traffic",
           title: `✨ Quality traffic week - High engagement`,
-          description: `${week.stats.qualityDays} high-quality days this week. Avg ${Math.round(avgEngagement)}m session time, ${(week.stats.avgBounceRate * 100).toFixed(1)}% bounce rate. People are genuinely interested.`,
+          description: `${week.stats.qualityDays} high-quality days this week. Avg ${Math.round(avgEngagement * 10) / 10}m session time, ${(week.stats.avgBounceRate * 100).toFixed(1)}% bounce rate. People are genuinely interested in your content.`,
           value: qualityScore,
           metadata: {
             qualityDays: week.stats.qualityDays,
@@ -177,7 +196,7 @@ export async function detectAndStoreWeeklyEvents(userId: string) {
               date: format(week.endDate, "yyyy-MM-dd"),
               event_type: "referrer_milestone",
               title: `🔥 ${source} dominated this week`,
-              description: `${source} brought ${Math.round(percentage)}% of your weekly traffic (${visitors} visitors). This is your top performer this week.`,
+              description: `${source} brought ${Math.round(percentage)}% of your weekly traffic (${visitors.toLocaleString()} visitors). This is your top performer this week.`,
               value: percentage,
               metadata: {
                 source,
@@ -213,7 +232,7 @@ export async function detectAndStoreWeeklyEvents(userId: string) {
             date: format(week3.endDate, "yyyy-MM-dd"),
             event_type: "growth_acceleration",
             title: `🚀 Acceleration detected - Growing faster`,
-            description: `Your growth is accelerating. Last week +${growth1} visitors, this week +${growth2}. You're gaining momentum!`,
+            description: `Your growth is accelerating. Last week +${growth1.toLocaleString()} visitors, this week +${growth2.toLocaleString()} visitors. You're gaining momentum!`,
             value: acceleration,
             metadata: {
               lastWeekGrowth: growth1,
@@ -252,7 +271,7 @@ export async function detectAndStoreWeeklyEvents(userId: string) {
                 date: format(lastWeek.endDate, "yyyy-MM-dd"),
                 event_type: "referrer_risk",
                 title: `⚠️ Over-dependent on one source`,
-                description: `${source} is ${Math.round(percentage)}% of your traffic. Diversify your marketing - don't rely on one platform.`,
+                description: `${source} is ${Math.round(percentage)}% of your traffic. This is risky. Diversify your marketing - don't put all your eggs in one basket.`,
                 value: percentage,
                 metadata: {
                   source,
@@ -284,8 +303,10 @@ export async function detectAndStoreWeeklyEvents(userId: string) {
       if (insertError) {
         console.error("Error inserting events:", insertError)
       } else {
-        console.log(`Successfully stored ${events.length} events for user ${userId}`)
+        console.log(`Successfully stored ${events.length} new weekly events for user ${userId}`)
       }
+    } else {
+      console.log("No significant weekly events to store")
     }
 
     return events
