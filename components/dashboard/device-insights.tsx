@@ -102,7 +102,7 @@ export function DeviceInsights({ data, timeRange }: Props) {
                   key={device.category}
                   className={`p-4 rounded-lg border transition-all ${
                     isMobile
-                      ? "bg-gradient-to-r from-purple-50 to-transparent border-purple-200"
+                      ? "bg-linear-to-r from-purple-50 to-transparent border-purple-200"
                       : "bg-gray-50 border-gray-200"
                   }`}
                 >

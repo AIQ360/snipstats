@@ -4,7 +4,7 @@ import { fetchGeographicDataForDateRange, fetchDeviceDataForDateRange } from "@/
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Get the user
     const {

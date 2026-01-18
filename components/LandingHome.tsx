@@ -178,19 +178,19 @@ export const LandingHome = () => {
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-6 h-6 rounded-md bg-blue-100 flex items-center justify-center shrink-0 mt-1">
                     <Share2 className="h-3.5 w-3.5 text-blue-600" />
                   </div>
                   <p className="text-[#383633]/80">Instantly create social-media ready images of your stats</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-6 h-6 rounded-md bg-blue-100 flex items-center justify-center shrink-0 mt-1">
                     <Download className="h-3.5 w-3.5 text-blue-600" />
                   </div>
                   <p className="text-[#383633]/80">Download as PNG or copy directly to clipboard</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-6 h-6 rounded-md bg-blue-100 flex items-center justify-center shrink-0 mt-1">
                     <Copy className="h-3.5 w-3.5 text-blue-600" />
                   </div>
                   <p className="text-[#383633]/80">Customizable templates to match your brand</p>
@@ -211,7 +211,7 @@ export const LandingHome = () => {
                   </div>
                 </div>
 
-                <div className="bg-white/10 backdrop-blur-sm rounded-md p-4 mb-4">
+                <div className="bg-white/10 backdrop-blur-xs rounded-md p-4 mb-4">
                   <div className="flex items-end justify-between">
                     <div>
                       <div className="text-xs text-white/70">Total Visitors</div>
@@ -234,7 +234,7 @@ export const LandingHome = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-md p-3">
+                  <div className="bg-white/10 backdrop-blur-xs rounded-md p-3">
                     <div className="text-xs text-white/70">Top Referrer</div>
                     <div className="flex items-center mt-1">
                       <Twitter className="h-4 w-4 text-blue-400 mr-1.5" />
@@ -242,7 +242,7 @@ export const LandingHome = () => {
                     </div>
                     <div className="text-xs text-white/70 mt-2">1,248 visitors</div>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-md p-3">
+                  <div className="bg-white/10 backdrop-blur-xs rounded-md p-3">
                     <div className="text-xs text-white/70">Top Page</div>
                     <div className="text-sm text-white font-semibold mt-1 truncate">/how-i-built-SnipStats</div>
                     <div className="text-xs text-white/70 mt-2">872 views</div>
@@ -370,7 +370,7 @@ export const LandingHome = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 bg-white rounded-md shadow-sm overflow-hidden relative group hover:shadow-md transition-all duration-300 border border-[#383633]/10">
+            <div className="md:col-span-2 bg-white rounded-md shadow-xs overflow-hidden relative group hover:shadow-md transition-all duration-300 border border-[#383633]/10">
               <div className="p-4 border-b flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <BarChart className="h-5 w-5 text-teal-600" />
@@ -494,7 +494,7 @@ export const LandingHome = () => {
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="bg-white rounded-md shadow-sm overflow-hidden border border-[#383633]/10 p-6">
+              <div className="bg-white rounded-md shadow-xs overflow-hidden border border-[#383633]/10 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div className="font-medium text-[#383633] flex items-center">
                     <Activity className="h-4 w-4 mr-2 text-amber-600" />
@@ -535,7 +535,7 @@ export const LandingHome = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-md shadow-sm overflow-hidden border border-[#383633]/10 p-6">
+              <div className="bg-white rounded-md shadow-xs overflow-hidden border border-[#383633]/10 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div className="font-medium text-[#383633] flex items-center">
                     <Camera className="h-4 w-4 mr-2 text-blue-600" />
@@ -570,7 +570,7 @@ export const LandingHome = () => {
           </div>
 
           <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
-            <div className="w-20 h-20 md:w-24 md:h-24 rounded-md bg-white border-2 border-[#383633]/10 flex-shrink-0 overflow-hidden shadow-sm mx-auto md:mx-0">
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-md bg-white border-2 border-[#383633]/10 shrink-0 overflow-hidden shadow-xs mx-auto md:mx-0">
               <Image
                 src="/diverse-group-city.png"
                 alt="Harvansh, Founder"
@@ -621,7 +621,7 @@ export const LandingHome = () => {
           </p>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-sm hover:border-[#383633]/30 hover:shadow-md transition-all group">
+            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-xs hover:border-[#383633]/30 hover:shadow-md transition-all group">
               <div className="w-10 h-10 rounded-md bg-rose-100 flex items-center justify-center mb-4 group-hover:bg-rose-200 transition-all">
                 <X className="h-5 w-5 text-rose-600" />
               </div>
@@ -631,7 +631,7 @@ export const LandingHome = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-sm hover:border-[#383633]/30 hover:shadow-md transition-all group">
+            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-xs hover:border-[#383633]/30 hover:shadow-md transition-all group">
               <div className="w-10 h-10 rounded-md bg-rose-100 flex items-center justify-center mb-4 group-hover:bg-rose-200 transition-all">
                 <X className="h-5 w-5 text-rose-600" />
               </div>
@@ -641,7 +641,7 @@ export const LandingHome = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-sm hover:border-[#383633]/30 hover:shadow-md transition-all group">
+            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-xs hover:border-[#383633]/30 hover:shadow-md transition-all group">
               <div className="w-10 h-10 rounded-md bg-rose-100 flex items-center justify-center mb-4 group-hover:bg-rose-200 transition-all">
                 <X className="h-5 w-5 text-rose-600" />
               </div>
@@ -651,7 +651,7 @@ export const LandingHome = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-sm hover:border-[#383633]/30 hover:shadow-md transition-all group">
+            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-xs hover:border-[#383633]/30 hover:shadow-md transition-all group">
               <div className="w-10 h-10 rounded-md bg-rose-100 flex items-center justify-center mb-4 group-hover:bg-rose-200 transition-all">
                 <X className="h-5 w-5 text-rose-600" />
               </div>
@@ -689,12 +689,12 @@ export const LandingHome = () => {
 
             <div className="space-y-12">
               <div className="flex flex-col md:flex-row gap-6 items-start relative">
-                <div className="md:w-16 flex-shrink-0 relative z-10">
+                <div className="md:w-16 shrink-0 relative z-10">
                   <div className="w-12 h-12 rounded-md bg-teal-100 flex items-center justify-center border-4 border-white">
                     <span className="text-xl font-bold text-teal-600">1</span>
                   </div>
                 </div>
-                <div className="flex-grow p-5 bg-white rounded-md shadow-sm border border-[#383633]/10 hover:border-[#383633]/30 transition-all">
+                <div className="grow p-5 bg-white rounded-md shadow-xs border border-[#383633]/10 hover:border-[#383633]/30 transition-all">
                   <h3 className="text-xl font-bold mb-3 text-[#383633]">Connect Your Google Account</h3>
                   <p className="text-[#383633]/80 mb-4">
                     SnapStats uses your existing Google Analytics data - no need to add new tracking code to your site.
@@ -708,12 +708,12 @@ export const LandingHome = () => {
               </div>
 
               <div className="flex flex-col md:flex-row gap-6 items-start relative">
-                <div className="md:w-16 flex-shrink-0 relative z-10">
+                <div className="md:w-16 shrink-0 relative z-10">
                   <div className="w-12 h-12 rounded-md bg-teal-100 flex items-center justify-center border-4 border-white">
                     <span className="text-xl font-bold text-teal-600">2</span>
                   </div>
                 </div>
-                <div className="flex-grow p-5 bg-white rounded-md shadow-sm border border-[#383633]/10 hover:border-[#383633]/30 transition-all">
+                <div className="grow p-5 bg-white rounded-md shadow-xs border border-[#383633]/10 hover:border-[#383633]/30 transition-all">
                   <h3 className="text-xl font-bold mb-3 text-[#383633]">Choose What Matters To You</h3>
                   <p className="text-[#383633]/80 mb-4">
                     Select which metrics you care about most. We'll put those front and center.
@@ -737,12 +737,12 @@ export const LandingHome = () => {
               </div>
 
               <div className="flex flex-col md:flex-row gap-6 items-start relative">
-                <div className="md:w-16 flex-shrink-0 relative z-10">
+                <div className="md:w-16 shrink-0 relative z-10">
                   <div className="w-12 h-12 rounded-md bg-teal-100 flex items-center justify-center border-4 border-white">
                     <span className="text-xl font-bold text-teal-600">3</span>
                   </div>
                 </div>
-                <div className="flex-grow p-5 bg-white rounded-md shadow-sm border border-[#383633]/10 hover:border-[#383633]/30 transition-all">
+                <div className="grow p-5 bg-white rounded-md shadow-xs border border-[#383633]/10 hover:border-[#383633]/30 transition-all">
                   <h3 className="text-xl font-bold mb-3 text-[#383633]">Get Insights & Share Your Wins</h3>
                   <p className="text-[#383633]/80 mb-4">
                     See your data translated into actual insights. Plus, create shareable screenshots to celebrate with
@@ -775,7 +775,7 @@ export const LandingHome = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-sm hover:border-[#383633]/30 transition-all group">
+            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-xs hover:border-[#383633]/30 transition-all group">
               <div className="w-12 h-12 rounded-md bg-amber-50 flex items-center justify-center mb-4 group-hover:bg-amber-100 transition-all">
                 <Lightbulb className="h-6 w-6 text-amber-500" />
               </div>
@@ -786,7 +786,7 @@ export const LandingHome = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-sm hover:border-[#383633]/30 transition-all group">
+            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-xs hover:border-[#383633]/30 transition-all group">
               <div className="w-12 h-12 rounded-md bg-teal-50 flex items-center justify-center mb-4 group-hover:bg-teal-100 transition-all">
                 <Zap className="h-6 w-6 text-teal-600" />
               </div>
@@ -796,9 +796,9 @@ export const LandingHome = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-sm hover:border-[#383633]/30 transition-all group md:col-span-2">
+            <div className="bg-white rounded-md border border-[#383633]/10 p-6 shadow-xs hover:border-[#383633]/30 transition-all group md:col-span-2">
               <div className="flex flex-col md:flex-row gap-6 items-center">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <div className="w-12 h-12 rounded-md bg-teal-50 flex items-center justify-center group-hover:bg-teal-100 transition-all">
                     <MousePointer className="h-6 w-6 text-teal-600" />
                   </div>
@@ -826,7 +826,7 @@ export const LandingHome = () => {
             Free to start. Paid only if it earns your trust.
           </p>
 
-          <div className="bg-white rounded-md border border-[#383633]/10 shadow-sm overflow-hidden max-w-md mx-auto transition-all duration-300 hover:border-[#383633]/30 hover:shadow-md">
+          <div className="bg-white rounded-md border border-[#383633]/10 shadow-xs overflow-hidden max-w-md mx-auto transition-all duration-300 hover:border-[#383633]/30 hover:shadow-md">
             <div className="p-8 border-b">
               <div className="text-2xl font-bold mb-2 text-[#383633]">Free to Start</div>
               <div className="text-4xl font-bold text-teal-600 mb-4">$0</div>
@@ -835,23 +835,23 @@ export const LandingHome = () => {
             <div className="p-6">
               <ul className="space-y-3">
                 <li className="flex items-center">
-                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 shrink-0" />
                   <span className="text-[#383633]/80">Connect to Google Analytics</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 shrink-0" />
                   <span className="text-[#383633]/80">See visitor trends</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 shrink-0" />
                   <span className="text-[#383633]/80">Track top content</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 shrink-0" />
                   <span className="text-[#383633]/80">Monitor traffic sources</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-teal-600 mr-2 shrink-0" />
                   <span className="text-[#383633]/80">Create shareable screenshots</span>
                 </li>
               </ul>

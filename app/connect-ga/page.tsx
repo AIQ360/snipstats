@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 export default async function ConnectGoogleAnalytics({
   searchParams,
 }: {
-  searchParams: { error?: string }
+  searchParams: Promise<{ error?: string }>
 }) {
   const supabase = await createClient()
 
@@ -35,7 +35,7 @@ export default async function ConnectGoogleAnalytics({
   }
 
   // Get error from search params
-  const { error } = searchParams
+  const { error } = await searchParams
 
   return (
     <div className="max-w-md px-4 py-12">

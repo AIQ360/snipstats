@@ -78,7 +78,7 @@ export function GeographicInsights({ data, timeRange }: Props) {
                 key={country.country}
                 className={`p-4 rounded-lg border transition-all ${
                   isTopCountry
-                    ? "bg-gradient-to-r from-blue-50 to-transparent border-blue-200"
+                    ? "bg-linear-to-r from-blue-50 to-transparent border-blue-200"
                     : "bg-gray-50 border-gray-200"
                 }`}
               >

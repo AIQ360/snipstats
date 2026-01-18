@@ -381,7 +381,7 @@ const IndieSignalsClient: React.FC = () => {
           {/* Best Day Hero Section */}
           {insights?.bestDay && (
             <div className="mb-16 relative">
-              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-amber-300 rounded-full"></div>
+              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-linear-to-b from-amber-500 to-amber-300 rounded-full"></div>
               <div className="flex items-center gap-4 ml-2">
                 <div className="text-5xl">🏆</div>
                 <div>
@@ -397,7 +397,7 @@ const IndieSignalsClient: React.FC = () => {
 
           {/* Key Metrics Section */}
           <div className="mb-16 relative">
-            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-600 to-blue-400 rounded-full"></div>
+            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-linear-to-b from-blue-600 to-blue-400 rounded-full"></div>
             <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-6 ml-2">Numbers That Don't Lie</h2>
 
             <div className="space-y-8 ml-2">
@@ -478,10 +478,10 @@ const IndieSignalsClient: React.FC = () => {
 
           {/* Chart or Table View */}
           <div className="mb-16 relative">
-            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-600 to-purple-400 rounded-full"></div>
+            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-linear-to-b from-purple-600 to-purple-400 rounded-full"></div>
 
             {viewMode === "chart" ? (
-              <div className="bg-gradient-to-br from-slate-50 to-white border border-slate-100 rounded-xl p-6 shadow-sm">
+              <div className="bg-linear-to-br from-slate-50 to-white border border-slate-100 rounded-xl p-6 shadow-xs">
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <RechartsLineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -567,7 +567,7 @@ const IndieSignalsClient: React.FC = () => {
           {/* Key Insights - Weekly Events */}
           {events.length > 0 && (
             <div className="mb-16 relative">
-              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-600 to-indigo-400 rounded-full"></div>
+              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-linear-to-b from-indigo-600 to-indigo-400 rounded-full"></div>
               <div className="ml-2">
                 <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-2">Key Insights</h2>
                 <p className="text-muted-foreground mb-8">Meaningful weekly trends and patterns in your data</p>
@@ -578,7 +578,7 @@ const IndieSignalsClient: React.FC = () => {
                       key={event.id || `${event.date}-${event.event_type}`}
                       className="flex items-start gap-4 p-4 border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
                     >
-                      <div className="text-2xl flex-shrink-0 mt-0.5">{event.title.charAt(0)}</div>
+                      <div className="text-2xl shrink-0 mt-0.5">{event.title.charAt(0)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                           <h3 className="font-semibold text-lg">{event.title}</h3>
@@ -586,7 +586,7 @@ const IndieSignalsClient: React.FC = () => {
                             {event.event_type.replace(/_/g, " ")}
                           </Badge>
                         </div>
-                        <p className="text-muted-foreground mb-2 break-words text-sm">{event.description}</p>
+                        <p className="text-muted-foreground mb-2 wrap-break-word text-sm">{event.description}</p>
                         <p className="text-xs text-muted-foreground">{formatEventDate(event.date)}</p>
                       </div>
                     </div>
@@ -599,7 +599,7 @@ const IndieSignalsClient: React.FC = () => {
           {/* Empty State for Events */}
           {events.length === 0 && (
             <div className="mb-16 relative">
-              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-slate-300 to-slate-200 rounded-full"></div>
+              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-linear-to-b from-slate-300 to-slate-200 rounded-full"></div>
               <div className="ml-2 text-center py-8">
                 <p className="text-muted-foreground">No significant insights yet. Check back next week!</p>
               </div>

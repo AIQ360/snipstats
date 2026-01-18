@@ -167,7 +167,7 @@ export function ReferrerIntelligenceClient({ referrers, topPages, analytics, use
           {(["7d", "14d", "30d"] as const).map((range) => (
             <Button
               key={range}
-              variant={timeRange === range ? "default" : "outline"}
+              variant={timeRange === range ? "default" : "outline-solid"}
               size="sm"
               onClick={() => setTimeRange(range)}
               className="rounded-full"
@@ -186,7 +186,7 @@ export function ReferrerIntelligenceClient({ referrers, topPages, analytics, use
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Visitors */}
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded bg-neutral-100 dark:bg-neutral-800 flex-shrink-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-neutral-100 dark:bg-neutral-800 shrink-0">
               <Users className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
             </div>
             <div className="space-y-1">
@@ -197,7 +197,7 @@ export function ReferrerIntelligenceClient({ referrers, topPages, analytics, use
 
           {/* Page Views */}
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded bg-neutral-100 dark:bg-neutral-800 flex-shrink-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-neutral-100 dark:bg-neutral-800 shrink-0">
               <Eye className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
             </div>
             <div className="space-y-1">
@@ -208,7 +208,7 @@ export function ReferrerIntelligenceClient({ referrers, topPages, analytics, use
 
           {/* Sources */}
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded bg-neutral-100 dark:bg-neutral-800 flex-shrink-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-neutral-100 dark:bg-neutral-800 shrink-0">
               <Target className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
             </div>
             <div className="space-y-1">
@@ -231,7 +231,7 @@ export function ReferrerIntelligenceClient({ referrers, topPages, analytics, use
                 key={index}
                 className="flex items-start gap-4 p-4 rounded border border-neutral-200 dark:border-neutral-800"
               >
-                <div className="flex-shrink-0 mt-0.5">
+                <div className="shrink-0 mt-0.5">
                   {insight.type === "growth" && insight.title.includes("+") ? (
                     <TrendingUp className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
                   ) : insight.type === "growth" ? (
@@ -281,7 +281,7 @@ export function ReferrerIntelligenceClient({ referrers, topPages, analytics, use
                     className="flex items-center justify-between p-4 rounded border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors"
                   >
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="flex h-8 w-8 items-center justify-center rounded text-neutral-500 dark:text-neutral-400 flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 text-xs font-medium">
+                      <div className="flex h-8 w-8 items-center justify-center rounded text-neutral-500 dark:text-neutral-400 shrink-0 bg-neutral-100 dark:bg-neutral-800 text-xs font-medium">
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -291,7 +291,7 @@ export function ReferrerIntelligenceClient({ referrers, topPages, analytics, use
                         <div className="text-xs text-neutral-500 dark:text-neutral-400">{percentage}% of traffic</div>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
+                    <div className="text-right shrink-0">
                       <div className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                         {referrer.visitors}
                       </div>
@@ -353,7 +353,7 @@ export function ReferrerIntelligenceClient({ referrers, topPages, analytics, use
                         {topReferrer && ` • Top: ${topReferrer.source}`}
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
+                    <div className="text-right shrink-0">
                       <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
                         {day.visitors > avgPerDay
                           ? `+${Math.round(((day.visitors - avgPerDay) / avgPerDay) * 100)}%`

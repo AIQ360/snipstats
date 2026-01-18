@@ -44,7 +44,7 @@ export function TrafficInsightCard({ insight, className = "" }: TrafficInsightCa
 
   return (
     <Card
-      className={`overflow-hidden border-[#EAEAEA] bg-white transition-all hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 ${className}`}
+      className={`overflow-hidden border-[#EAEAEA] bg-white transition-all hover:shadow-xs dark:border-neutral-800 dark:bg-neutral-900 ${className}`}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between">

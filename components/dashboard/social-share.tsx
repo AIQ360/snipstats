@@ -86,7 +86,7 @@ export function SocialShare({ onShare, isLoading }: SocialShareProps) {
           <div className="flex items-center gap-2">
             <Button
               type="button"
-              variant={platform === "twitter" ? "default" : "outline"}
+              variant={platform === "twitter" ? "default" : "outline-solid"}
               className="flex-1"
               onClick={() => setPlatform("twitter")}
             >
@@ -94,7 +94,7 @@ export function SocialShare({ onShare, isLoading }: SocialShareProps) {
             </Button>
             <Button
               type="button"
-              variant={platform === "linkedin" ? "default" : "outline"}
+              variant={platform === "linkedin" ? "default" : "outline-solid"}
               className="flex-1"
               onClick={() => setPlatform("linkedin")}
             >

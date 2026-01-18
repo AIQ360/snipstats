@@ -92,7 +92,7 @@ export function DateRangeTabs({ onRangeChange, className, initialRange }: DateRa
             size="sm"
             className={cn(
               "flex-1 text-xs sm:text-sm",
-              activeTab === "7d" ? "bg-background text-foreground shadow-sm" : "",
+              activeTab === "7d" ? "bg-background text-foreground shadow-xs" : "",
             )}
             onClick={() => handleTabChange("7d")}
             disabled={isLoading}
@@ -104,7 +104,7 @@ export function DateRangeTabs({ onRangeChange, className, initialRange }: DateRa
             size="sm"
             className={cn(
               "flex-1 text-xs sm:text-sm",
-              activeTab === "14d" ? "bg-background text-foreground shadow-sm" : "",
+              activeTab === "14d" ? "bg-background text-foreground shadow-xs" : "",
             )}
             onClick={() => handleTabChange("14d")}
             disabled={isLoading}
@@ -116,7 +116,7 @@ export function DateRangeTabs({ onRangeChange, className, initialRange }: DateRa
             size="sm"
             className={cn(
               "flex-1 text-xs sm:text-sm",
-              activeTab === "30d" ? "bg-background text-foreground shadow-sm" : "",
+              activeTab === "30d" ? "bg-background text-foreground shadow-xs" : "",
             )}
             onClick={() => handleTabChange("30d")}
             disabled={isLoading}

@@ -7,7 +7,7 @@ import { LogOut, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface SignOutButtonProps {
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
+  variant?: "default" | "destructive" | "outline-solid" | "secondary" | "ghost" | "link"
   size?: "default" | "sm" | "lg" | "icon"
   className?: string
 }

@@ -439,7 +439,7 @@ export function TrafficIntelligenceClient({
             {(["7d", "14d", "30d"] as const).map((range) => (
               <Button
                 key={range}
-                variant={timeRange === range ? "default" : "outline"}
+                variant={timeRange === range ? "default" : "outline-solid"}
                 size="sm"
                 onClick={() => setTimeRange(range)}
                 className="rounded-full"
@@ -479,7 +479,7 @@ export function TrafficIntelligenceClient({
                 {socialPlatformAnalysis.map((platform) => (
                   <div
                     key={platform.platform}
-                    className="bg-gradient-to-r from-orange-50 to-transparent border-l-4 border-orange-400 rounded-r-lg p-4 md:p-6"
+                    className="bg-linear-to-r from-orange-50 to-transparent border-l-4 border-orange-400 rounded-r-lg p-4 md:p-6"
                   >
                     {/* Platform Header - Mobile Optimized */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -511,7 +511,7 @@ export function TrafficIntelligenceClient({
                           {platform.spikes.map((spike, index) => (
                             <div
                               key={spike.date}
-                              className="bg-white border border-orange-200 p-3 rounded-lg shadow-sm"
+                              className="bg-white border border-orange-200 p-3 rounded-lg shadow-xs"
                             >
                               <div className="font-bold text-lg text-gray-900">{spike.visitors} visitors</div>
                               <div className="text-sm text-muted-foreground">{spike.dayName}</div>
@@ -663,7 +663,7 @@ export function TrafficIntelligenceClient({
                           {index + 1}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="text-lg sm:text-xl font-bold mb-1 break-words">{page.path}</h3>
+                          <h3 className="text-lg sm:text-xl font-bold mb-1 wrap-break-word">{page.path}</h3>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Eye className="h-4 w-4" />
@@ -715,11 +715,11 @@ export function TrafficIntelligenceClient({
                       {opportunities.map((opp) => (
                         <div
                           key={opp.path}
-                          className="bg-gradient-to-r from-blue-50 to-transparent border-l-4 border-blue-400 rounded-r-lg p-4"
+                          className="bg-linear-to-r from-blue-50 to-transparent border-l-4 border-blue-400 rounded-r-lg p-4"
                         >
                           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                             <div className="min-w-0 flex-1">
-                              <h4 className="font-bold text-gray-900 mb-2 break-words">{opp.path}</h4>
+                              <h4 className="font-bold text-gray-900 mb-2 wrap-break-word">{opp.path}</h4>
                               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground mb-3">
                                 <span className="flex items-center gap-1">
                                   <TrendingDown className="h-4 w-4 text-red-500" />

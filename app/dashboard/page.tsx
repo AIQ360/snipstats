@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { BarChart3, TrendingUp, Users, MousePointer } from "lucide-react"
 import Link from "next/link"
 import { Suspense } from "react"
-import { DashboardClient } from "@/components/dashboard/dashboard-client"
+import { GSCAnalyticsDashboard } from "@/components/dashboard/gsc-analytics-dashboard"
 
 export const dynamic = "force-dynamic"
 
@@ -34,8 +34,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <Suspense fallback={<div>Loading dashboard...</div>}>
-        <DashboardClient userId={user.id} />
+      <Suspense fallback={<div className="flex h-64 items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-primary rounded-full border-t-transparent" /></div>}>
+        <GSCAnalyticsDashboard userId={user.id} websiteUrl={gaAccount.website_url} />
       </Suspense>
     </div>
   )
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
 
 function NoDataWelcomeScreen({ websiteUrl }: { websiteUrl: string }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

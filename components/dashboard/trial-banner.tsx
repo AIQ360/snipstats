@@ -20,7 +20,7 @@ export function TrialBanner({ daysRemaining, isExpired }: TrialBannerProps) {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
         <div className="flex items-start">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <AlertCircle className="h-5 w-5 text-red-500" />
           </div>
           <div className="ml-3 flex-1 md:flex md:justify-between md:items-center">
@@ -45,7 +45,7 @@ export function TrialBanner({ daysRemaining, isExpired }: TrialBannerProps) {
     return (
       <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6">
         <div className="flex items-start">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <AlertCircle className="h-5 w-5 text-amber-500" />
           </div>
           <div className="ml-3 flex-1 md:flex md:justify-between md:items-center">
